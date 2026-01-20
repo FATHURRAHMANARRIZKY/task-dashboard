@@ -9,11 +9,13 @@ export default function LoginPage() {
 
   const handleLogin = () => {
     setLoading(true);
-    // Simulasi set cookie (biasanya ini via API, tapi untuk portofolio simple bisa di client)
+
+    // Set cookie agar Middleware menganggap user sudah login
     document.cookie = "auth_session=true; path=/; max-age=3600"; // Expire 1 jam
 
     setTimeout(() => {
-      router.push("/"); // Redirect ke dashboard
+      // PERBAIKAN: Arahkan ke /dashboard, bukan / (Home)
+      router.push("/dashboard");
       router.refresh();
     }, 500);
   };
@@ -27,7 +29,7 @@ export default function LoginPage() {
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-70"
         >
           {loading ? "Logging in..." : "Sign In with Demo Account"}
         </button>

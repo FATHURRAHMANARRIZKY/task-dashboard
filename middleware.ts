@@ -2,26 +2,25 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  // 1. Cek apakah user punya cookie 'auth_session'
   const isAuthenticated = request.cookies.has("auth_session");
-
-  // 2. Cek apakah user sedang mengakses halaman Login
   const isLoginPage = request.nextUrl.pathname === "/auth/login";
+  // Cek jika user mencoba akses folder dashboard
+  const isDashboard = request.nextUrl.pathname.startsWith("/dashboard");
 
-  // Skenario A: User belum login, tapi mau masuk halaman utama (/)
-  if (!isAuthenticated && !isLoginPage) {
+  // 1. Kalau mau masuk Dashboard tapi belum login -> Tendang ke Login
+  if (isDashboard && !isAuthenticated) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
-  // Skenario B: User sudah login, tapi mau masuk halaman login lagi
-  if (isAuthenticated && isLoginPage) {
-    return NextResponse.redirect(new URL("/", request.url));
+  // 2. Kalau sudah login tapi buka halaman Login lagi -> Oper ke Dashboard
+  if (isLoginPage && isAuthenticated) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();
 }
 
-// Tentukan route mana yang mau dijaga
+// Config: Tentukan route mana yang kena efek middleware
 export const config = {
-  matcher: ["/", "/auth/login"],
+  matcher: ["/dashboard/:path*", "/auth/login"],
 };

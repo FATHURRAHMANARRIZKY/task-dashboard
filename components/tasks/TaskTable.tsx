@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { useTasks, Task } from "@/hooks/useTasks";
+import { Skeleton } from "@/components/Skeleton";
 
 const columnHelper = createColumnHelper<Task>();
 
@@ -112,15 +113,41 @@ export default function TaskTable() {
     getFilteredRowModel: getFilteredRowModel(), // Aktifkan Filtering
   });
 
-  if (isLoading)
+  if (isLoading) {
     return (
-      <div className="p-8 text-center text-gray-500 animate-pulse">
-        Loading tasks...
+      <div className="space-y-4">
+        {/* Skeleton untuk Search Bar & Filter */}
+        <div className="flex gap-4 mb-4">
+          <Skeleton className="h-10 flex-1" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        {/* Skeleton untuk Tabel */}
+        <div className="rounded-lg border border-gray-200 bg-white p-4">
+          <div className="space-y-4">
+            {/* Header Skeleton */}
+            <div className="flex justify-between border-b pb-4">
+              <Skeleton className="h-6 w-1/4" />
+              <Skeleton className="h-6 w-1/4" />
+              <Skeleton className="h-6 w-1/4" />
+            </div>
+            {/* Rows Skeleton (Looping 5 baris) */}
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex justify-between py-2">
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
+  }
+
   if (isError)
     return (
-      <div className="p-8 text-center text-red-500">Error loading data.</div>
+      <div className="p-8 text-center text-red-500 bg-red-50 rounded-lg">
+        Failed to load data. Please try again.
+      </div>
     );
 
   return (
