@@ -20,11 +20,19 @@ async function deleteTask(id: string) {
   await fetch(`/api/tasks?id=${id}`, { method: "DELETE" });
 }
 
-async function updateStatus({ id, status }: { id: string; status: string }) {
+async function updateTask({
+  id,
+  status,
+  priority,
+}: {
+  id: string;
+  status?: string;
+  priority?: string;
+}) {
   await fetch("/api/tasks", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id, status }),
+    body: JSON.stringify({ id, status, priority }), // Kirim apa adanya
   });
 }
 
@@ -32,8 +40,7 @@ async function createTask(title: string) {
   const res = await fetch("/api/tasks", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    // Kita hardcode userId dulu karena belum login
-    body: JSON.stringify({ title, userId: "user-dummy-id" }),
+    body: JSON.stringify({ title }),
   });
   if (!res.ok) throw new Error("Failed to create task");
   return res.json();
@@ -59,7 +66,7 @@ export function useTasks() {
 
   // C. Mutation: Update Status
   const updateMutation = useMutation({
-    mutationFn: updateStatus,
+    mutationFn: updateTask, // <-- Pakai fungsi baru
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },

@@ -71,12 +71,35 @@ export default function TaskTable() {
       header: "Priority",
       cell: (info) => {
         const priority = info.getValue();
-        const colors = {
-          LOW: "text-gray-500",
-          MEDIUM: "text-yellow-600 font-medium",
-          HIGH: "text-red-600 font-bold",
+        const id = info.row.original.id;
+
+        const colors: Record<string, string> = {
+          LOW: "text-gray-500 bg-gray-100 hover:bg-gray-200",
+          MEDIUM: "text-yellow-700 bg-yellow-50 hover:bg-yellow-100",
+          HIGH: "text-red-700 bg-red-50 hover:bg-red-100",
         };
-        return <span className={colors[priority]}>{priority}</span>;
+
+        // Logic Rotasi Priority: LOW -> MEDIUM -> HIGH -> LOW
+        const handlePriorityClick = () => {
+          const nextPriority =
+            priority === "LOW"
+              ? "MEDIUM"
+              : priority === "MEDIUM"
+                ? "HIGH"
+                : "LOW";
+          // Kita panggil mutation dengan properti 'priority'
+          updateMutation.mutate({ id, priority: nextPriority });
+        };
+
+        return (
+          <button
+            onClick={handlePriorityClick}
+            disabled={updateMutation.isPending}
+            className={`px-2 py-1 rounded text-xs font-bold transition-colors uppercase ${colors[priority]} ${updateMutation.isPending ? "opacity-50 cursor-wait" : ""}`}
+          >
+            {priority}
+          </button>
+        );
       },
     }),
     columnHelper.display({

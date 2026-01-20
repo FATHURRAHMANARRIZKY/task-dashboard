@@ -1,24 +1,16 @@
-"use client";
-
-import { useRouter } from "next/navigation";
+// Perhatikan: TIDAK ADA 'use client' di sini. Ini Server Component.
 import Link from "next/link";
-import { LayoutDashboard, LogOut, Settings, User } from "lucide-react";
+import { LayoutDashboard, Settings } from "lucide-react";
+import { getUser } from "@/lib/auth";
+import UserNav from "@/components/UserNav"; // Import komponen client tadi
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-
-  const handleLogout = () => {
-    // 1. Hapus Cookie (Set max-age ke 0)
-    document.cookie = "auth_session=; path=/; max-age=0";
-
-    // 2. Redirect ke Login
-    router.push("/login");
-    router.refresh();
-  };
+  // Ambil data user langsung di server (Cepat & Aman)
+  const user = await getUser();
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -44,38 +36,17 @@ export default function DashboardLayout({
           </div>
         </nav>
 
-        {/* User Profile & Logout */}
-        <div className="p-4 border-t border-gray-100">
-          <div className="flex items-center gap-3 mb-4 px-2">
-            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
-              <User size={16} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">Demo User</p>
-              <p className="text-xs text-gray-500">demo@example.com</p>
-            </div>
-          </div>
-
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition"
-          >
-            <LogOut size={18} />
-            Sign Out
-          </button>
-        </div>
+        {/* User Profile & Logout (Dynamic) */}
+        {/* Kita oper data user asli ke komponen Client */}
+        {user && <UserNav name={user.name} email={user.email} />}
       </aside>
 
       {/* --- MAIN CONTENT AREA --- */}
       <main className="flex-1 p-8 overflow-y-auto h-screen">
-        {/* Tombol Logout Mobile (Hanya muncul di layar kecil) */}
-        <div className="md:hidden flex justify-end mb-4">
-          <button
-            onClick={handleLogout}
-            className="text-sm text-red-600 font-medium"
-          >
-            Log Out
-          </button>
+        {/* Mobile Header (Opsional, user profile sederhana) */}
+        <div className="md:hidden flex justify-between items-center mb-6">
+          <span className="font-bold text-blue-600">TaskPro</span>
+          <span className="text-sm text-gray-600">{user?.name}</span>
         </div>
 
         {children}

@@ -1,22 +1,21 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    // Panggil API Login
-    const res = await fetch("/api/auth/login", {
+    const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
@@ -28,21 +27,19 @@ export default function LoginPage() {
       setError(data.error);
       setLoading(false);
     } else {
-      // Sukses Login -> API sudah set cookie HttpOnly
-      // Kita tinggal redirect ke dashboard
-      router.push("/dashboard");
-      router.refresh();
+      // Sukses Register -> Redirect ke Login
+      router.push("/login");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center">
-          Welcome Back
+        <h1 className="text-2xl font-bold text-gray-900 mb-1 text-center">
+          Create Account
         </h1>
-        <p className="text-gray-500 mb-6 text-center">
-          Please login to manage tasks
+        <p className="text-gray-500 text-sm mb-6 text-center">
+          Start organizing your tasks today
         </p>
 
         {error && (
@@ -51,7 +48,19 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleRegister} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Name
+            </label>
+            <input
+              type="text"
+              className="mt-1 w-full border border-gray-300 rounded-md p-2"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              required
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Email
@@ -80,16 +89,16 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-70"
+            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50"
           >
-            {loading ? "Logging in..." : "Sign In"}
+            {loading ? "Creating Account..." : "Sign Up"}
           </button>
         </form>
 
         <p className="mt-4 text-center text-sm text-gray-600">
-          Don't have an account?{" "}
-          <Link href="/auth/register" className="text-blue-600 hover:underline">
-            Sign up
+          Already have an account?{" "}
+          <Link href="/auth/login" className="text-blue-600 hover:underline">
+            Sign in
           </Link>
         </p>
       </div>
