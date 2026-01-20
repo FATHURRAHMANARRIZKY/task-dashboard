@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useTaskStore } from "@/store/useTaskStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTaskStore } from "@/store/useTaskStore"; // Kita tetap import store jika ingin update global state setelah save (opsional)
 
 interface TaskFormProps {
   isEdit?: boolean;
@@ -25,22 +25,34 @@ interface TaskFormProps {
 export default function TaskForm({ isEdit, id, initialData }: TaskFormProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { title, description, status, priority, setTask, reset } =
-    useTaskStore();
 
+  // SOLUSI: Gunakan useState Local agar data langsung ter-binding saat render pertama
+  // Ini mencegah masalah "Select Kosong" karena delay useEffect
+  const [formData, setFormData] = useState({
+    title: initialData?.title || "",
+    description: initialData?.description || "",
+    status: initialData?.status || "TODO",
+    priority: initialData?.priority || "MEDIUM",
+  });
+
+  // Sinkronisasi data jika initialData berubah (misal fetch selesai)
   useEffect(() => {
     if (initialData) {
-      setTask({
+      setFormData({
         title: initialData.title || "",
         description: initialData.description || "",
         status: initialData.status || "TODO",
         priority: initialData.priority || "MEDIUM",
       });
-    } else {
-      reset();
     }
-  }, [initialData, setTask, reset]);
+  }, [initialData]);
 
+  // Helper untuk update state form
+  const handleChange = (key: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  // Mutasi Create/Update
   const mutation = useMutation({
     mutationFn: async (data: any) => {
       const url = isEdit ? `/api/tasks/${id}` : "/api/tasks";
@@ -56,6 +68,9 @@ export default function TaskForm({ isEdit, id, initialData }: TaskFormProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      // Opsional: invalidate query detail juga agar data fresh
+      if (id) queryClient.invalidateQueries({ queryKey: ["task", id] });
+
       router.push("/dashboard");
       router.refresh();
     },
@@ -63,42 +78,54 @@ export default function TaskForm({ isEdit, id, initialData }: TaskFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mutation.mutate({ title, description, status, priority });
+    mutation.mutate(formData);
   };
 
   return (
-    <Card className="max-w-2xl mx-auto">
+    <Card className="max-w-2xl mx-auto border-none shadow-none sm:border sm:shadow-sm">
       <CardHeader>
         <CardTitle>{isEdit ? "Edit Task" : "Create New Task"}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-sm font-medium">Title</label>
+          {/* Title Input */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              Title
+            </label>
             <Input
-              value={title}
-              onChange={(e) => setTask({ title: e.target.value })}
+              value={formData.title}
+              onChange={(e) => handleChange("title", e.target.value)}
+              placeholder="e.g. Finish report"
               required
             />
           </div>
 
-          <div>
-            <label className="text-sm font-medium">Description</label>
+          {/* Description Input */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              Description
+            </label>
             <Textarea
-              value={description}
-              onChange={(e) => setTask({ description: e.target.value })}
+              value={formData.description}
+              onChange={(e) => handleChange("description", e.target.value)}
+              placeholder="Add details..."
+              className="resize-none min-h-[100px]"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">Status</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Status Select */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none">Status</label>
+              {/* Tambahkan key agar komponen me-reset diri jika nilai berubah drastis */}
               <Select
-                value={status}
-                onValueChange={(val) => setTask({ status: val })}
+                key={formData.status}
+                value={formData.status}
+                onValueChange={(val) => handleChange("status", val)}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="TODO">Todo</SelectItem>
@@ -108,14 +135,18 @@ export default function TaskForm({ isEdit, id, initialData }: TaskFormProps) {
               </Select>
             </div>
 
-            <div>
-              <label className="text-sm font-medium">Priority</label>
+            {/* Priority Select */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none">
+                Priority
+              </label>
               <Select
-                value={priority}
-                onValueChange={(val) => setTask({ priority: val })}
+                key={formData.priority}
+                value={formData.priority}
+                onValueChange={(val) => handleChange("priority", val)}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="LOW">Low</SelectItem>
@@ -126,7 +157,7 @@ export default function TaskForm({ isEdit, id, initialData }: TaskFormProps) {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
+          <div className="flex justify-end gap-3 pt-6">
             <Button
               type="button"
               variant="outline"
@@ -135,7 +166,11 @@ export default function TaskForm({ isEdit, id, initialData }: TaskFormProps) {
               Cancel
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Saving..." : "Save Task"}
+              {mutation.isPending
+                ? "Saving..."
+                : isEdit
+                  ? "Update Task"
+                  : "Create Task"}
             </Button>
           </div>
         </form>
