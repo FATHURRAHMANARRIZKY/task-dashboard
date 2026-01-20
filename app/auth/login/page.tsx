@@ -15,7 +15,6 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    // Panggil API Login
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -28,8 +27,6 @@ export default function LoginPage() {
       setError(data.error);
       setLoading(false);
     } else {
-      // Sukses Login -> API sudah set cookie HttpOnly
-      // Kita tinggal redirect ke dashboard
       router.push("/dashboard");
       router.refresh();
     }

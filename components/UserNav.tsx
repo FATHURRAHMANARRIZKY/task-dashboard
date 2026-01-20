@@ -13,7 +13,7 @@ export default function UserNav({ name, email }: UserNavProps) {
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
+    router.push("/auth/login");
     router.refresh();
   };
 

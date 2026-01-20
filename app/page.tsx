@@ -31,9 +31,8 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Footer simple */}
       <footer className="absolute bottom-8 text-gray-400 text-sm">
-        © 2024 Task App Portfolio. Built with Next.js 14.
+        © 2024 Task App By F21.
       </footer>
     </div>
   );

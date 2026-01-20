@@ -4,7 +4,7 @@ import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
-  getFilteredRowModel, // Import baru untuk filter
+  getFilteredRowModel,
   flexRender,
   createColumnHelper,
   SortingState,
@@ -18,13 +18,10 @@ const columnHelper = createColumnHelper<Task>();
 export default function TaskTable() {
   const { tasksQuery, deleteMutation, updateMutation } = useTasks();
   const { data: tasks, isLoading, isError } = tasksQuery;
-
-  // State untuk Sorting dan Filtering
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = useState(""); // Untuk search bar
-  const [statusFilter, setStatusFilter] = useState(""); // Untuk dropdown status
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
-  // Definisi Kolom
   const columns = [
     columnHelper.accessor("title", {
       header: "Task Name",
@@ -64,7 +61,6 @@ export default function TaskTable() {
           </button>
         );
       },
-      // Fungsi filter khusus untuk kolom status
       filterFn: "equalsString",
     }),
     columnHelper.accessor("priority", {
@@ -79,7 +75,6 @@ export default function TaskTable() {
           HIGH: "text-red-700 bg-red-50 hover:bg-red-100",
         };
 
-        // Logic Rotasi Priority: LOW -> MEDIUM -> HIGH -> LOW
         const handlePriorityClick = () => {
           const nextPriority =
             priority === "LOW"
@@ -87,7 +82,6 @@ export default function TaskTable() {
               : priority === "MEDIUM"
                 ? "HIGH"
                 : "LOW";
-          // Kita panggil mutation dengan properti 'priority'
           updateMutation.mutate({ id, priority: nextPriority });
         };
 
@@ -132,29 +126,24 @@ export default function TaskTable() {
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(), // Aktifkan Sorting
-    getFilteredRowModel: getFilteredRowModel(), // Aktifkan Filtering
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
   });
 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        {/* Skeleton untuk Search Bar & Filter */}
         <div className="flex gap-4 mb-4">
           <Skeleton className="h-10 flex-1" />
           <Skeleton className="h-10 w-32" />
         </div>
-
-        {/* Skeleton untuk Tabel */}
         <div className="rounded-lg border border-gray-200 bg-white p-4">
           <div className="space-y-4">
-            {/* Header Skeleton */}
             <div className="flex justify-between border-b pb-4">
               <Skeleton className="h-6 w-1/4" />
               <Skeleton className="h-6 w-1/4" />
               <Skeleton className="h-6 w-1/4" />
             </div>
-            {/* Rows Skeleton (Looping 5 baris) */}
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex justify-between py-2">
                 <Skeleton className="h-12 w-full" />
@@ -175,17 +164,13 @@ export default function TaskTable() {
 
   return (
     <div className="space-y-4">
-      {/* --- FILTER & SEARCH BAR --- */}
       <div className="flex gap-4 mb-4">
-        {/* Search Input */}
         <input
           value={globalFilter ?? ""}
           onChange={(e) => setGlobalFilter(e.target.value)}
           placeholder="Search tasks..."
           className="flex-1 border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-
-        {/* Status Dropdown */}
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -198,7 +183,6 @@ export default function TaskTable() {
         </select>
       </div>
 
-      {/* --- TABEL UTAMA --- */}
       <div className="overflow-hidden rounded-lg border border-gray-200 shadow-sm bg-white">
         <table className="w-full text-left text-sm text-gray-500">
           <thead className="bg-gray-50 border-b border-gray-200">
@@ -208,14 +192,13 @@ export default function TaskTable() {
                   <th
                     key={header.id}
                     className="px-6 py-3 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={header.column.getToggleSortingHandler()} // Klik header untuk sort
+                    onClick={header.column.getToggleSortingHandler()}
                   >
                     <div className="flex items-center gap-1">
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext(),
                       )}
-                      {/* Indikator Sorting */}
                       {{
                         asc: " 🔼",
                         desc: " 🔽",
@@ -254,7 +237,6 @@ export default function TaskTable() {
         </table>
       </div>
 
-      {/* Footer Info */}
       <div className="text-sm text-gray-500 text-right">
         Showing {table.getRowModel().rows.length} tasks
       </div>

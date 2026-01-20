@@ -4,12 +4,11 @@ import { cookies } from "next/headers";
 const secretKey = process.env.JWT_SECRET || "secret-default";
 const key = new TextEncoder().encode(secretKey);
 
-// 1. Fungsi Membuat Session (Login)
 export async function createSession(payload: {
   userId: string;
   email: string;
 }) {
-  const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 Jam expire
+  const expires = new Date(Date.now() + 60 * 60 * 1000);
 
   const session = await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
@@ -17,7 +16,6 @@ export async function createSession(payload: {
     .setExpirationTime("1h")
     .sign(key);
 
-  // PERBAIKAN: Tambahkan 'await' sebelum cookies()
   const cookieStore = await cookies();
 
   cookieStore.set("auth_session", session, {
@@ -28,7 +26,6 @@ export async function createSession(payload: {
   });
 }
 
-// 2. Fungsi Verifikasi Session (Middleware)
 export async function verifySession(token: string | undefined = "") {
   try {
     const { payload } = await jwtVerify(token, key, {
@@ -40,9 +37,7 @@ export async function verifySession(token: string | undefined = "") {
   }
 }
 
-// 3. Fungsi Hapus Session (Logout)
 export async function deleteSession() {
-  // PERBAIKAN: Tambahkan 'await' sebelum cookies()
   const cookieStore = await cookies();
   cookieStore.delete("auth_session");
 }
@@ -54,20 +49,17 @@ export async function getUser() {
 
   if (!session || !session.userId) return null;
 
-  // Opsional: Ambil detail lengkap dari Database (jika butuh Nama, bukan cuma ID)
-  // Kita butuh import { prisma } from '@/lib/prisma' di atas
-  // Tapi biar cepat, kita asumsikan kamu mau ambil nama dari DB:
-
-  // Pastikan import prisma ditambahkan di atas file ini:
-  // import { prisma } from '@/lib/prisma'
-
   try {
-    const user = await import("@/lib/prisma").then((m) =>
-      m.prisma.user.findUnique({
-        where: { id: String(session.userId) },
-        select: { name: true, email: true }, // Ambil nama & email saja
-      }),
-    );
+    const { prisma } = await import("@/lib/prisma");
+
+    const user = await prisma.user.findUnique({
+      where: { id: String(session.userId) },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
     return user;
   } catch (error) {
     return null;

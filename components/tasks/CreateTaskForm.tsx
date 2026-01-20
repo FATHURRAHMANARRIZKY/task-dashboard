@@ -12,26 +12,22 @@ export default function CreateTaskForm() {
     e.preventDefault();
     if (!title.trim()) return;
 
-    // Jalankan mutasi create
     createMutation.mutate(title, {
       onSuccess: () => {
-        setTitle(""); // Reset input
-        setIsOpen(false); // Tutup form
+        setTitle("");
+        setIsOpen(false);
       },
     });
   };
 
   return (
     <div>
-      {/* Tombol Buka Form */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition font-medium flex items-center gap-2"
       >
         <span>+</span> Add New Task
       </button>
-
-      {/* Form Sederhana (Muncul jika isOpen = true) */}
       {isOpen && (
         <form
           onSubmit={handleSubmit}

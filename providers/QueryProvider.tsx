@@ -8,13 +8,12 @@ export default function QueryProvider({
 }: {
   children: React.ReactNode;
 }) {
-  // useState memastikan QueryClient hanya dibuat sekali per sesi browser
   const [queryClient] = useState(
     () =>
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000, // Data dianggap fresh selama 1 menit
+            staleTime: 60 * 1000,
           },
         },
       }),

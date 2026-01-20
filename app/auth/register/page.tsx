@@ -27,8 +27,7 @@ export default function RegisterPage() {
       setError(data.error);
       setLoading(false);
     } else {
-      // Sukses Register -> Redirect ke Login
-      router.push("/login");
+      router.push("/auth/login");
     }
   };
 

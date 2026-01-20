@@ -13,7 +13,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // 1. Cek apakah email sudah terdaftar
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return NextResponse.json(
@@ -22,10 +21,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Hash Password (Enkripsi)
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 3. Simpan ke Database
     const newUser = await prisma.user.create({
       data: {
         name,
