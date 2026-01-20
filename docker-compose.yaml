@@ -5,7 +5,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:.Server21@db:5432/taskdb
+      - .env
     depends_on:
       - db
   db:

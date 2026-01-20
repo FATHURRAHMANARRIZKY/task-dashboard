@@ -4,7 +4,7 @@ Aplikasi Task Management fullstack menggunakan Next.js App Router, Prisma, Postg
 
 ## 🛠 Tech Stack
 
-- **Framework:** Next.js 14
+- **Framework:** Next.js 16
 - **Database:** PostgreSQL
 - **ORM:** Prisma
 - **UI:** Shadcn/UI + Tailwind CSS
@@ -25,8 +25,8 @@ Saya memilih **Zustand** untuk manajemen state form di detail/create task karena
 1.  **Clone Repository**
 
     ```bash
-    git clone <repo-url>
-    cd <repo-name>
+    git clone FATHURRAHMANARRIZKY/task-dashboard
+    cd FATHURRAHMANARRIZKY/task-dashboard
     ```
 
 2.  **Install Dependencies**
